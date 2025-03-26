@@ -6,6 +6,8 @@ global:
 jumpstarter-controller:
   grpc:
     mode: "ingress"
+    ingress:
+      class: "nginx"
   config:
     authentication:
       jwt:
@@ -14,7 +16,6 @@ jumpstarter-controller:
           audiences:
           - jumpstarter-cli
           audienceMatchPolicy: MatchAny
-          certificateAuthority: placeholder
         claimMappings:
           username:
             claim: "name"
