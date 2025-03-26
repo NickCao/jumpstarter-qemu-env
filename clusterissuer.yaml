@@ -36,7 +36,7 @@ metadata:
   name: jumpstarter-bundle
 spec:
   sources:
-  # - useDefaultCAs: true
+  - useDefaultCAs: true
   - secret:
       name: jumpstarter-ca-secret
       key: tls.crt
