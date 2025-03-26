@@ -1,10 +1,12 @@
+podAnnotations:
+  autocert.step.sm/name: dex.dex.svc.cluster.local
 https:
   enabled: true
 config:
   issuer: https://dex.dex.svc.cluster.local:5554
   web:
-    tlsCert: /etc/dex/tls/tls.crt
-    tlsKey: /etc/dex/tls/tls.key
+    tlsCert: /var/run/autocert.step.sm/site.crt
+    tlsKey: /var/run/autocert.step.sm/site.key
   storage:
     type: kubernetes
     config:
@@ -28,10 +30,3 @@ config:
         userNameKey: sub
         scopes:
           - profile
-volumes:
-  - name: tls
-    secret:
-      secretName: dex-tls
-volumeMounts:
-  - name: tls
-    mountPath: /etc/dex/tls
