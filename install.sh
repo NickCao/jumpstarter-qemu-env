@@ -38,3 +38,9 @@ helm upgrade --install \
   -f dex.values.yaml \
   --wait \
   --wait-for-jobs
+# install jumpstarter
+helm upgrade --install jumpstarter oci://quay.io/jumpstarter-dev/helm/jumpstarter \
+  --version=0.5.0-114-g530557a \
+  --namespace jumpstarter-lab --create-namespace \
+  -f jumpstarter.values.yaml \
+  --wait --wait-for-jobs
