@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euxo pipefail
+# create kind cluster
+# kind create cluster --config kind.yaml
 # install cert-manager
 helm repo add jetstack https://charts.jetstack.io --force-update
 helm install \
@@ -17,6 +19,7 @@ helm upgrade --install ingress-nginx ingress-nginx \
   --repo https://kubernetes.github.io/ingress-nginx \
   --namespace ingress-nginx --create-namespace \
   --set controller.service.type=NodePort \
+  --set controller.config.worker-processes=2 \
   --wait --wait-for-jobs
 # allow unauthenticated access to oidc endpoint
 kubectl create clusterrolebinding oidc-reviewer  \
@@ -24,7 +27,7 @@ kubectl create clusterrolebinding oidc-reviewer  \
   --group=system:unauthenticated
 # install dex
 helm repo add dex https://charts.dexidp.io --force-update
-helm install \
+helm upgrade --install \
   dex dex/dex \
   --namespace dex \
   --create-namespace \
