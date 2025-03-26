@@ -2,20 +2,13 @@
 set -euxo pipefail
 # create kind cluster
 # kind create cluster --config kind.yaml
-# install cert-manager
-helm repo add jetstack https://charts.jetstack.io --force-update
-helm install \
-  cert-manager jetstack/cert-manager \
-  --namespace cert-manager \
-  --create-namespace \
-  --version v1.17.0 \
-  --set crds.enabled=true \
-  --wait \
-  --wait-for-jobs
-helm upgrade trust-manager jetstack/trust-manager \
-  --install \
-  --namespace cert-manager \
-  --wait
+
+# install autocert
+helm upgrade --install autocert autocert \
+  --namespace autocert --create-namespace \
+  --repo https://smallstep.github.io/helm-charts \
+  --wait --wait-for-jobs
+
 # bootstrap selfsigned issuer
 kubectl apply -f clusterissuer.yaml
 # install nginx ingress controller
