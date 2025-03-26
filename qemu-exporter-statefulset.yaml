@@ -1,0 +1,66 @@
+# for i in $(seq 0 2); do
+#   jmp admin create exporter "qemu-exporter-${i}" --out /dev/null \
+#     --oidc-username kubernetes:system:serviceaccount:<namespace>:qemu-exporter
+# done
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qemu-exporter
+data:
+  endpoint: placeholder
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qemu-exporter
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qemu-exporter
+spec:
+  serviceName: qemu-exporter
+  replicas: 3
+  selector:
+    matchLabels:
+      exporter-mock: qemu
+  template:
+    metadata:
+      labels:
+        exporter-mock: qemu
+    spec:
+      serviceAccountName: qemu-exporter
+      restartPolicy: Always
+      containers:
+        - name: jumpstarter-exporter
+          image: quay.io/ncao/jumpstarter:summit
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: JUMPSTARTER_GRPC_INSECURE
+              value: "1"
+            - name: JUMPSTARTER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: qemu-exporter
+                  key: endpoint
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euxo pipefail
+
+              cat <<EOF > qemu.yaml
+              apiVersion: jumpstarter.dev/v1alpha1
+              kind: ExporterConfig
+              metadata:
+                namespace: default
+                name: $(cat /etc/hostname)
+              endpoint: ${JUMPSTARTER_ENDPOINT}
+              token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              export:
+                qemu:
+                  type: jumpstarter_driver_qemu.driver.Qemu
+              EOF
+
+              jmp run --exporter-config qemu.yaml

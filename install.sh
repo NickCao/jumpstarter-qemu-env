@@ -23,6 +23,15 @@ helm upgrade --install dex dex \
   -f dex.values.yaml \
   --wait --wait-for-jobs
 
+# install jumpstarter
+kubectl create namespace jumpstarter-lab
+kubectl label  namespace jumpstarter-lab autocert.step.sm=enabled
+helm upgrade --install jumpstarter oci://quay.io/jumpstarter-dev/helm/jumpstarter \
+  --version=0.5.0-114-g530557a \
+  --namespace jumpstarter-lab --create-namespace \
+  -f jumpstarter.values.yaml \
+  --wait --wait-for-jobs
+
 # install nginx ingress controller
 # helm upgrade --install ingress-nginx ingress-nginx \
 #   --repo https://kubernetes.github.io/ingress-nginx \
@@ -30,9 +39,3 @@ helm upgrade --install dex dex \
 #   --set controller.service.type=NodePort \
 #   --set controller.config.worker-processes=2 \
 #   --wait --wait-for-jobs
-# install jumpstarter
-helm upgrade --install jumpstarter oci://quay.io/jumpstarter-dev/helm/jumpstarter \
-  --version=0.5.0-114-g530557a \
-  --namespace jumpstarter-lab --create-namespace \
-  -f jumpstarter.values.yaml \
-  --wait --wait-for-jobs
