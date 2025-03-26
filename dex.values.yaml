@@ -1,0 +1,38 @@
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned-cluster-issuer
+  hosts:
+    - host: dex.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - dex.example.com
+      secretName: dex-cert
+config:
+  issuer: https://dex.example.com
+  storage:
+    type: kubernetes
+    config:
+      inCluster: true
+  staticClients:
+    - id: jumpstarter-cli
+      name: Jumpstarter CLI
+      public: true
+  oauth2:
+    responseTypes: ["code", "token", "id_token", "id_token token"]
+    passwordConnector: local
+  connectors:
+    - name: kubernetes
+      type: oidc
+      id: kubernetes
+      config:
+        # kubectl get --raw /.well-known/openid-configuration | jq -r '.issuer'
+        issuer: "https://kubernetes.default.svc.cluster.local"
+        rootCAs:
+          - /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        userNameKey: sub
+        scopes:
+          - profile
