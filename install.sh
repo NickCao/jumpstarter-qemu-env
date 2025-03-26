@@ -12,6 +12,12 @@ helm install \
   --wait-for-jobs
 # bootstrap selfsigned issuer
 kubectl apply -f clusterissuer.yaml
+# install nginx ingress controller
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  --set controller.service.type=NodePort \
+  --wait --wait-for-jobs
 # allow unauthenticated access to oidc endpoint
 kubectl create clusterrolebinding oidc-reviewer  \
   --clusterrole=system:service-account-issuer-discovery \
