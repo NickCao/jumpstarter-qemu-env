@@ -12,7 +12,7 @@ jumpstarter-controller:
     authentication:
       jwt:
       - issuer:
-          url: https://dex.example.com
+          url: https://dex.dex.svc.cluster.local:5554
           audiences:
           - jumpstarter-cli
           audienceMatchPolicy: MatchAny
