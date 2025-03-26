@@ -12,6 +12,10 @@ helm install \
   --set crds.enabled=true \
   --wait \
   --wait-for-jobs
+helm upgrade trust-manager jetstack/trust-manager \
+  --install \
+  --namespace cert-manager \
+  --wait
 # bootstrap selfsigned issuer
 kubectl apply -f clusterissuer.yaml
 # install nginx ingress controller

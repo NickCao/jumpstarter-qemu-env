@@ -4,3 +4,22 @@ metadata:
   name: selfsigned-cluster-issuer
 spec:
   selfSigned: {}
+---
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: public-bundle
+spec:
+  sources:
+  - useDefaultCAs: true
+  - inLine: |
+      -----BEGIN CERTIFICATE-----
+      MIIExxx
+      -----END CERTIFICATE-----
+      ...
+  target:
+    configMap:
+      key: "ca-certificates.crt"
+    namespaceSelector:
+      matchLabels:
+        trust: enabled
