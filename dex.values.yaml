@@ -1,19 +1,10 @@
-ingress:
+https:
   enabled: true
-  className: nginx
-  annotations:
-    cert-manager.io/cluster-issuer: selfsigned-cluster-issuer
-  hosts:
-    - host: dex.example.com
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls:
-    - hosts:
-        - dex.example.com
-      secretName: dex-cert
 config:
-  issuer: https://dex.example.com
+  issuer: https://dex.dex.svc.cluster.local:5554
+  web:
+    tlsCert: /etc/dex/tls/tls.crt
+    tlsKey: /etc/dex/tls/tls.key
   storage:
     type: kubernetes
     config:
@@ -37,3 +28,10 @@ config:
         userNameKey: sub
         scopes:
           - profile
+volumes:
+  - name: tls
+    secret:
+      secretName: dex-tls
+volumeMounts:
+  - name: tls
+    mountPath: /etc/dex/tls

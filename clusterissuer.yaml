@@ -28,7 +28,7 @@ metadata:
   name: jumpstarter-cluster-issuer
 spec:
   ca:
-    secretName: jumpstarter-ca-secert
+    secretName: jumpstarter-ca-secret
 ---
 apiVersion: trust.cert-manager.io/v1alpha1
 kind: Bundle
@@ -43,3 +43,25 @@ spec:
   target:
     configMap:
       key: "jumpstarter-bundle.pem"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dex
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dex
+  namespace: dex
+spec:
+  dnsNames:
+  - dex.dex.svc.cluster.local
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: jumpstarter-cluster-issuer
+  secretName: dex-tls
+  usages:
+  - "digital signature"
+  - "key encipherment"
