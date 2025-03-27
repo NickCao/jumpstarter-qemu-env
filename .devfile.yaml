@@ -10,7 +10,7 @@ metadata:
 components:
   - name: runtime
     container:
-      image: quay.io/jumpstarter-dev/jumpstarter:latest
+      image: quay.io/jumpstarter-dev/jumpstarter-devspace:latest
       mountSources: true
       env:
         - name: JUMPSTARTER_GRPC_INSECURE
