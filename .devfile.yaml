@@ -26,7 +26,7 @@ commands:
         kind: ClientConfig
         metadata:
           namespace: jumpstarter-qemu-exporter
-          name: $(kubectl auth whoami -o jsonpath="{.status.userInfo.username}")
+          name: $(sed "s|-devspaces||" /run/secrets/kubernetes.io/serviceaccount/namespace)
         endpoint: grpc.apps.cluster-lptwk.lptwk.sandbox1315.opentlc.com:443
         token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
         drivers:
