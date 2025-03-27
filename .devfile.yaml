@@ -21,7 +21,7 @@ commands:
       component: runtime
       commandLine: |
         # generate jumpstarter client config
-        cat > .config/jumpstarter/clients/qemu.yaml <<EOF
+        cat > ~/.config/jumpstarter/clients/qemu.yaml <<EOF
         apiVersion: jumpstarter.dev/v1alpha1
         kind: ClientConfig
         metadata:
