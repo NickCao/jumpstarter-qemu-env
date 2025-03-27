@@ -1,19 +1,29 @@
-# for i in $(seq 0 2); do
-#   jmp admin create exporter "qemu-exporter-${i}" --out /dev/null \
-#     --oidc-username kubernetes:system:serviceaccount:<namespace>:qemu-exporter
-# done
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: qemu-exporter
-data:
-  endpoint: placeholder
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: qemu-exporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: qemu-exporter-role
+rules:
+  - apiGroups: ["jumpstarter.dev"]
+    resources: ["exporters"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: qemu-exporter-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: qemu-exporter-role
+subjects:
+  - kind: ServiceAccount
+    name: qemu-exporter
+    namespace: default # FIXME: make namespace configurable
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -32,18 +42,50 @@ spec:
     spec:
       serviceAccountName: qemu-exporter
       restartPolicy: Always
+      volumes:
+        - name: shared
+          emptyDir: {}
+      initContainers:
+        - name: jumpstarter-init
+          image: quay.io/jumpstarter-dev/jumpstarter-utils:latest
+          volumeMounts:
+            - mountPath: /shared
+              name: shared
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -exo pipefail
+
+              kubectl apply -f - << EOF
+              apiVersion: jumpstarter.dev/v1alpha1
+              kind: Exporter
+              metadata:
+                namespace: $(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+                name: $(cat /etc/hostname)
+                labels:
+                  example.com/board: qemu
+              spec:
+                username: kubernetes:$(kubectl auth whoami -o jsonpath="{.status.userInfo.username}")
+              EOF
+
+              while [ -z "$ENDPOINT" ]
+              do
+                ENDPOINT=$(kubectl get -n $(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace) \
+                  exporters.jumpstarter.dev $(cat /etc/hostname) -o jsonpath="{.status.endpoint}")
+                sleep 1s
+              done
+              echo "$ENDPOINT" > /shared/endpoint
       containers:
         - name: jumpstarter-exporter
           image: quay.io/ncao/jumpstarter:summit
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /shared
+              name: shared
           env:
             - name: JUMPSTARTER_GRPC_INSECURE
               value: "1"
-            - name: JUMPSTARTER_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  name: qemu-exporter
-                  key: endpoint
           command:
             - /bin/bash
             - -c
@@ -54,9 +96,9 @@ spec:
               apiVersion: jumpstarter.dev/v1alpha1
               kind: ExporterConfig
               metadata:
-                namespace: default
+                namespace: $(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
                 name: $(cat /etc/hostname)
-              endpoint: ${JUMPSTARTER_ENDPOINT}
+              endpoint: $(cat /shared/endpoint)
               token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
               export:
                 qemu:
