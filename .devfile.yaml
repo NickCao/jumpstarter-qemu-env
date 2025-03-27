@@ -10,5 +10,32 @@ metadata:
 components:
   - name: runtime
     container:
-      image: quay.io/jumpstarter-dev/jumpstarter-dev:latest
+      image: quay.io/jumpstarter-dev/jumpstarter:latest
       mountSources: true
+      env:
+        - name: JUMPSTARTER_GRPC_INSECURE
+          value: 1
+commands:
+  - id: configure-jumpstarter
+    exec:
+      component: runtime
+      commandLine: |
+        # generate jumpstarter client config
+        mkdir -p .config/jumpstarter/clients/
+        cat > .config/jumpstarter/clients/qemu.yaml <<EOF
+        apiVersion: jumpstarter.dev/v1alpha1
+        kind: ClientConfig
+        metadata:
+          namespace: jumpstarter-qemu-exporter
+          name: $(kubectl auth whoami -o jsonpath="{.status.userInfo.username}")
+        endpoint: grpc.apps.cluster-lptwk.lptwk.sandbox1315.opentlc.com:443
+        token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+        drivers:
+          allow: []
+          unsafe: True
+        EOF
+        # set default config
+        jmp config client use qemu
+events:
+  preStart:
+    - configure-jumpstarter
