@@ -1,0 +1,14 @@
+schemaVersion: 2.3.0
+metadata:
+  name: jumpstarter-dev
+  icon: https://jumpstarter.dev/jumpstarter.svg
+  tags:
+    - Python
+    - UV
+    - Jumpstarter
+  language: Python
+components:
+  - name: runtime
+    container:
+      image: quay.io/jumpstarter-dev/jumpstarter-dev:latest
+      mountSources: true
