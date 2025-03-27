@@ -36,6 +36,3 @@ commands:
         EOF
         # set default config
         jmp config client use qemu
-events:
-  postStart:
-    - configure-jumpstarter
