@@ -45,6 +45,14 @@ spec:
       volumes:
         - name: shared
           emptyDir: {}
+        - name: dev-kvm
+          hostPath:
+            path: /dev/kvm
+            type: CharDevice
+        - name: dev-vhost-vsock
+          hostPath:
+            path: /dev/vhost-vsock
+            type: CharDevice
       initContainers:
         - name: jumpstarter-init
           image: quay.io/jumpstarter-dev/jumpstarter-utils:latest
@@ -83,6 +91,10 @@ spec:
           volumeMounts:
             - mountPath: /shared
               name: shared
+            - mountPath: /dev/kvm
+              name: dev-kvm
+            - mountPath: /dev/vhost-vsock
+              name: dev-vhost-vsock
           env:
             - name: JUMPSTARTER_GRPC_INSECURE
               value: "1"
