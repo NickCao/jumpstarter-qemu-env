@@ -37,5 +37,5 @@ commands:
         # set default config
         jmp config client use qemu
 events:
-  preStart:
+  postStart:
     - configure-jumpstarter
