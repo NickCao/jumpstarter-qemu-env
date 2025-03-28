@@ -1,0 +1,10 @@
+name: summit
+content:
+  rpms:
+    - cloud-init
+    - openssh-server
+  add_files:
+    - path: /etc/selinux/config
+      text: |
+        SELINUX=permissive
+        SELINUXTYPE=targeted
