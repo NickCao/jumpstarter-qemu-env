@@ -21,20 +21,20 @@ commands:
       component: runtime
       commandLine: |
         # generate jumpstarter client config
-        cat > ~/.config/jumpstarter/clients/qemu.yaml <<EOF
+        cat > ~/.config/jumpstarter/clients/lab.yaml <<EOF
         apiVersion: jumpstarter.dev/v1alpha1
         kind: ClientConfig
         metadata:
           namespace: jumpstarter-qemu-exporter
           name: $(sed "s|-devspaces||" /run/secrets/kubernetes.io/serviceaccount/namespace)
-        endpoint: grpc.apps.cluster-lptwk.lptwk.sandbox1315.opentlc.com:443
+        endpoint: grpc.${DASHBOARD_URL#"https://devspaces."}:443
         token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
         drivers:
           allow: []
           unsafe: True
         EOF
         # set default config
-        jmp config client use qemu
+        jmp config client use lab
 events:
   postStart:
     - configure-jumpstarter
