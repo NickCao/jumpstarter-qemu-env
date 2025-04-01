@@ -20,6 +20,17 @@ commands:
     exec:
       component: runtime
       commandLine: |
+        # create jumpstarter client config directories
+        mkdir -p ~/.config/jumpstarter/clients/
+
+        # generate jumpstarter user config
+        cat > ~/.config/jumpstarter/config.yaml <<EOF
+        apiVersion: jumpstarter.dev/v1alpha1
+        kind: UserConfig
+        config:
+          current-client: lab
+        EOF
+
         # generate jumpstarter client config
         cat > ~/.config/jumpstarter/clients/lab.yaml <<EOF
         apiVersion: jumpstarter.dev/v1alpha1
@@ -33,8 +44,6 @@ commands:
           allow: []
           unsafe: True
         EOF
-        # set default config
-        jmp config client use lab
 events:
   postStart:
     - configure-jumpstarter
